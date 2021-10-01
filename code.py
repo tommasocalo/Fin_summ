@@ -160,7 +160,7 @@ class SP500_series(object):
 
             df_sent['ts'] = pd.to_datetime(df_sent.ts)
             if not df_sent.empty :
-                
+
                 df_sent = df_sent.groupby('ts',as_index=False).mean()
             df_sent.set_index('ts', inplace=True)
             df_nan = pd.DataFrame(np.nan, index=self.df.index, columns=['Sentiments'])
@@ -194,7 +194,7 @@ class SP500_series(object):
 
             df_ad['ad'] =df_ad['ad'].sub(df_ad['ad'].shift()).map(lambda x: np.sign(x))
             df_ad['close']=df_ad['close'].sub(df_ad['close'].shift()).map(lambda x: np.sign(x))
-            df_ad['g']=df_ad[df_ad['ad']*df_ad['close']<0]
+            df_ad['g']=df_ad.ad[df_ad['ad']*df_ad['close']<0]
             df_ad[df_ad['g'].notnull()]
             df_ad['g'] = df_ad['g'][df_ad['g'].notnull()].map(lambda x: '1' if x == 1 else 'Z')
             # Z  : Accumulation Distribution decreases while price increases
@@ -235,8 +235,11 @@ class SP500_series(object):
             df_ad=df_ad.cumsum()
             df_ad = pd.DataFrame(index=df_ad.index,data={'ad':df_ad.acc_dist.ewm(span=12, adjust=False).mean(),'close':self.df.Close.ewm(span=12, adjust=False).mean(),'g':''})
             df_ad['ad'] =df_ad['ad'].sub(df_ad['ad'].shift()).map(lambda x: np.sign(x))
+
+            import IPython
+
             df_ad['close']=df_ad['close'].sub(df_ad['close'].shift()).map(lambda x: np.sign(x))
-            df_ad['g']=df_ad[df_ad['ad']*df_ad['close']<0]
+            df_ad['g']=df_ad.ad[df_ad['ad']*df_ad['close']<0]
             df_ad[df_ad['g'].notnull()]
             df_ad['g'] = df_ad['g'][df_ad['g'].notnull()].map(lambda x: '1' if x == 1 else 'Z')
             self.df_final['ADL']= df_ad.g.values
